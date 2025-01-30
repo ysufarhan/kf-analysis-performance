@@ -1,7 +1,7 @@
 WITH kf_analysis_performance AS (
     SELECT
         *,
-        CAST(ROUND(price * (1 - discount_percentage)) AS INT64) AS nett_sales,
+        price * (1 - discount_percentage) AS nett_sales,
         CASE
             WHEN ROUND(price * (1 - discount_percentage)) <= 50000 THEN 0.1
             WHEN ROUND(price * (1 - discount_percentage)) > 50000 AND ROUND(price * (1 - discount_percentage)) <= 100000 THEN 0.15
