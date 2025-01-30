@@ -1,16 +1,24 @@
 WITH kf_analysis_performance AS (
     SELECT
         *,
-        price * (1 - discount_percentage) AS nett_sales,
-        CASE
-            WHEN ROUND(price * (1 - discount_percentage)) <= 50000 THEN 0.1
-            WHEN ROUND(price * (1 - discount_percentage)) > 50000 AND ROUND(price * (1 - discount_percentage)) <= 100000 THEN 0.15
-            WHEN ROUND(price * (1 - discount_percentage)) > 100000 AND ROUND(price * (1 - discount_percentage)) <= 300000 THEN 0.2
-            WHEN ROUND(price * (1 - discount_percentage)) > 300000 AND ROUND(price * (1 - discount_percentage)) <= 500000 THEN 0.25
-            WHEN ROUND(price * (1 - discount_percentage)) > 500000 THEN 0.3
-        END AS persentase_gross_laba
+        -- Hitung nett_sales dengan CAST
+        ROUND(CAST(price AS FLOAT64) * (1 - CAST(discount_percentage AS FLOAT64))) AS nett_sales
     FROM
         `rakamin-kf-analytics-448708.kimia_farma.kf_final_transaction`
+),
+kf_with_profit AS (
+    SELECT
+        *,
+        -- Gunakan nett_sales yang sudah dihitung di CASE
+        CASE
+            WHEN nett_sales <= 50000 THEN 0.1
+            WHEN nett_sales > 50000 AND nett_sales <= 100000 THEN 0.15
+            WHEN nett_sales > 100000 AND nett_sales <= 300000 THEN 0.2
+            WHEN nett_sales > 300000 AND nett_sales <= 500000 THEN 0.25
+            WHEN nett_sales > 500000 THEN 0.3
+        END AS persentase_gross_laba
+    FROM
+        kf_analysis_performance
 )
 SELECT
     ft.transaction_id,
@@ -31,7 +39,7 @@ SELECT
     ft.nett_sales * ft.persentase_gross_laba AS nett_profit,
     ft.rating AS rating_transaksi
 FROM
-    kf_analysis_performance AS ft
+    kf_with_profit AS ft
 JOIN `rakamin-kf-analytics-448708.kimia_farma.kf_product` AS kp
     ON kp.product_id = ft.product_id
 JOIN `rakamin-kf-analytics-448708.kimia_farma.kf_kantor_cabang` AS kc
