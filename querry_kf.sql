@@ -9,7 +9,7 @@ WITH kf_analysis_performance AS (
 kf_with_profit AS (
     SELECT
         *,
-        -- Gunakan nett_sales yang sudah dihitung di CASE
+        -- Gunakan nett_sales yang sudah dihitung di CASE --
         CASE
             WHEN nett_sales <= 50000 THEN 0.1
             WHEN nett_sales > 50000 AND nett_sales <= 100000 THEN 0.15
